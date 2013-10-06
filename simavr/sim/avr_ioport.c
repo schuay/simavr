@@ -44,7 +44,11 @@ static void avr_ioport_write(struct avr_t * avr, avr_io_addr_t addr, uint8_t v, 
 
 	// raise the internal IRQ callbacks
 	for (int i = 0; i < 8; i++)
-		avr_raise_irq(p->io.irq + i, (v >> i) & 1);
+	{
+		// DO NOT modify PIN bits configured as inputs in DDR; only outputs
+		if ( avr->data[p->r_ddr] >> i & 1 )
+			avr_raise_irq(p->io.irq + i, (v >> i) & 1);
+	}
 	avr_raise_irq(p->io.irq + IOPORT_IRQ_PIN_ALL, v);
 }
 

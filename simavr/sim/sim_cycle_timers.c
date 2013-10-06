@@ -19,6 +19,7 @@
 	along with simavr.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -171,6 +172,7 @@ avr_cycle_timer_process(
 		do {
 			DEBUG(printf("%s %2d when %7d %p/%p\n", __func__, pool->count, (int)(when), timer.timer, timer.param););
 			when = timer.timer(avr, when, timer.param);
+			assert( !when || when >= avr->cycle );
 		} while (when && when <= avr->cycle);
 		if (when) {
 			DEBUG(printf("%s %2d reschedule when %7d %p/%p\n", __func__, pool->count, (int)(when), timer.timer, timer.param);)

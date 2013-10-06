@@ -1,0 +1,59 @@
+obj-x86_64-linux-gnu/iobug.elf
+Loaded 3528 .text
+Loaded 46 .data
+firmware atmega48_iobug.axf f=8000000 mmcu=atmega48
+Starting atmega48 - flashend 0fff ramend 02ff e2end 00ff
+atmega48 init
+..
+line 38 ..
+line 39 PINB: 00..
+line 40 PINB: 01..
+line 41 PINB: 00..
+line 44 ..
+line 45 PINB: 00..
+line 46 PINB: 00..
+line 47 PINB: 00..
+line 48 PINB: 00..
+line 51 ..
+line 52 PINB: 00..
+line 53 PINB: 00..
+line 54 PINB: 00..
+line 57 ..
+line 58 PINB: 00..
+line 59 PINB: 00..
+line 60 PINB: 00..
+line 61 PINB: 00..
+line 64 ..
+line 65 PINB: 00..
+line 66 PINB: 03..
+line 67 PINB: 01..
+line 68 PINB: 02..
+line 69 PINB: 00..
+line 70 PINB: 03..
+line 71 PINB: 01..
+line 72 PINB: 02..
+line 73 PINB: 00..
+line 83 ..
+line 84 ..
+line 85 ..
+line 86 INT0_vect..
+line 87 ..
+line 88 INT0_vect..
+line 89 INT0_vect..
+line 94 ..
+line 95 ..
+line 96 ..
+line 97 ..
+line 98 ..
+line 99 ..
+line 101 ..
+line 102 ..
+line 103 ..
+line 104 ..
+line 105 INT0_vect..
+line 106 ..
+line 107 INT0_vect..
+line 108 ..
+line 109 INT0_vect..
+line 110 ..
+simavr: sleeping with interrupts off, quitting gracefully

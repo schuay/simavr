@@ -162,6 +162,10 @@ typedef struct avr_t {
 	 */
 	uint32_t sleep_usec;
 	
+	// if non-zero, scales sleep times by sleep_scale/256
+	// That is, runs simulator at 256/sleep_scale x real-time (128=200%, 256=100%, 512=50%)
+	int sleep_scale; 
+	
 	// called at init time
 	void (*init)(struct avr_t * avr);
 	// called at init time (for special purposes like using a memory mapped file as flash see: simduino)
@@ -286,7 +290,7 @@ typedef struct avr_t {
 // this is a static constructor for each of the AVR devices
 typedef struct avr_kind_t {
 	const char * names[4];	// name aliases
-	avr_t * (*make)();
+	avr_t * (*make)(void);
 } avr_kind_t;
 
 // a symbol loaded from the .elf file

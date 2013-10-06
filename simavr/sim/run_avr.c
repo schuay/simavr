@@ -34,12 +34,13 @@
 
 void display_usage(char * app)
 {
-	printf("Usage: %s [-t] [-g] [-v] [-m <device>] [-f <frequency>] firmware\n", app);
+	printf("Usage: %s [-t] [-g] [-v] [-s msec] [-m <device>] [-f <frequency>] firmware\n", app);
 	printf("       -t: Run full scale decoder trace\n"
 		   "       -g: Listen for gdb connection on port 1234\n"
 		   "       -ff: Load next .hex file as flash\n"
 		   "       -ee: Load next .hex file as eeprom\n"
 		   "       -v: Raise verbosity level (can be passed more than once)\n"
+		   "       -s: Stop after given number of milliseconds is simulated\n"
 		   "   Supported AVR cores:\n");
 	for (int i = 0; avr_kind[i]; i++) {
 		printf("       ");
@@ -73,7 +74,8 @@ int main(int argc, char *argv[])
 	uint32_t loadBase = AVR_SEGMENT_OFFSET_FLASH;
 	int trace_vectors[8] = {0};
 	int trace_vectors_count = 0;
-
+	avr_cycle_count_t cyc = 0;
+	
 	if (argc == 1)
 		display_usage(basename(argv[0]));
 
@@ -92,6 +94,9 @@ int main(int argc, char *argv[])
 				display_usage(basename(argv[0]));
 		} else if (!strcmp(argv[pi], "-t") || !strcmp(argv[pi], "-trace")) {
 			trace++;
+		} else if (!strcmp(argv[pi], "-s")) {
+			if (pi < argc-1)
+				cyc = atoi(argv[++pi]);
 		} else if (!strcmp(argv[pi], "-ti")) {
 			if (pi < argc-1)
 				trace_vectors[trace_vectors_count++] = atoi(argv[++pi]);
@@ -175,9 +180,12 @@ int main(int argc, char *argv[])
 	signal(SIGINT, sig_int);
 	signal(SIGTERM, sig_int);
 
+	cyc = cyc * avr->frequency / 1000;
 	for (;;) {
 		int state = avr_run(avr);
 		if ( state == cpu_Done || state == cpu_Crashed)
+			break;
+		if ( avr->cycle >= cyc && cyc )
 			break;
 	}
 	

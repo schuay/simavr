@@ -56,6 +56,7 @@ int avr_init(avr_t * avr)
 	avr->sleep = avr_callback_sleep_raw;
 	avr->state = cpu_Running;
 	avr->log = 1;
+	avr->sleep_scale = 0;
 	avr_reset(avr);	
 	return 0;
 }
@@ -186,7 +187,9 @@ static inline uint32_t avr_pending_sleep_usec(avr_t * avr, avr_cycle_count_t how
 {
 	avr->sleep_usec += avr_cycles_to_usec(avr, howLong);
 	uint32_t usec = avr->sleep_usec;
-	if (usec > 200) {
+	if ( avr->sleep_scale )
+		usec = ((uint64_t) usec * avr->sleep_scale) >> 8;
+	if (usec >= 10000) {
 		avr->sleep_usec = 0;
 		return usec;
 	}

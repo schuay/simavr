@@ -546,6 +546,7 @@ avr_flashaddr_t avr_run_one(avr_t * avr)
 									_avr_set_r(avr, 1, res >> 8);
 									avr->sreg[S_C] = (res >> 15) & 1;
 									avr->sreg[S_Z] = res == 0;
+									cycle++;
 									SREG();
 								}	break;
 								case 0x0300: {	// MUL Multiply 0000 0011 fddd frrr
@@ -730,8 +731,10 @@ avr_flashaddr_t avr_run_one(avr_t * avr)
 			_avr_set_r(avr, r, res);
 			if (res)
 				avr->sreg[S_Z] = 0;
+			avr->sreg[S_H] = get_compare_carry(res, vr, k, 3);
+			avr->sreg[S_V] = get_compare_overflow(res, vr, k);
 			avr->sreg[S_N] = (res >> 7) & 1;
-			avr->sreg[S_C] = (k + avr->sreg[S_C]) > vr;
+			avr->sreg[S_C] = get_compare_carry(res, vr, k, 7);
 			avr->sreg[S_S] = avr->sreg[S_N] ^ avr->sreg[S_V];
 			SREG();
 		}	break;
@@ -742,9 +745,11 @@ avr_flashaddr_t avr_run_one(avr_t * avr)
 			uint8_t res = vr - k;
 			STATE("subi %s[%02x], 0x%02x = %02x\n", avr_regname(r), avr->data[r], k, res);
 			_avr_set_r(avr, r, res);
-			avr->sreg[S_Z] = res  == 0;
+			avr->sreg[S_Z] = res == 0;
+			avr->sreg[S_H] = get_compare_carry(res, vr, k, 3);
+			avr->sreg[S_V] = get_compare_overflow(res, vr, k);
 			avr->sreg[S_N] = (res >> 7) & 1;
-			avr->sreg[S_C] = k > vr;
+			avr->sreg[S_C] = get_compare_carry(res, vr, k, 7);
 			avr->sreg[S_S] = avr->sreg[S_N] ^ avr->sreg[S_V];
 			SREG();
 		}	break;
@@ -1088,7 +1093,7 @@ avr_flashaddr_t avr_run_one(avr_t * avr)
 							_avr_set_r(avr, r, res);
 							avr->sreg[S_Z] = res == 0;
 							avr->sreg[S_N] = res >> 7;
-							avr->sreg[S_V] = res == 0x7f;
+							avr->sreg[S_V] = res == 0x80;
 							avr->sreg[S_S] = avr->sreg[S_N] ^ avr->sreg[S_V];
 							SREG();
 						}	break;
@@ -1126,7 +1131,7 @@ avr_flashaddr_t avr_run_one(avr_t * avr)
 							_avr_set_r(avr, r, res);
 							avr->sreg[S_Z] = res == 0;
 							avr->sreg[S_C] = vr & 1;
-							avr->sreg[S_N] = 0;
+							avr->sreg[S_N] = res >> 7;
 							avr->sreg[S_V] = avr->sreg[S_N] ^ avr->sreg[S_C];
 							avr->sreg[S_S] = avr->sreg[S_N] ^ avr->sreg[S_V];
 							SREG();
@@ -1138,7 +1143,7 @@ avr_flashaddr_t avr_run_one(avr_t * avr)
 							_avr_set_r(avr, r, res);
 							avr->sreg[S_Z] = res == 0;
 							avr->sreg[S_N] = res >> 7;
-							avr->sreg[S_V] = res == 0x80;
+							avr->sreg[S_V] = res == 0x7f;
 							avr->sreg[S_S] = avr->sreg[S_N] ^ avr->sreg[S_V];
 							SREG();
 						}	break;
@@ -1344,7 +1349,7 @@ avr_flashaddr_t avr_run_one(avr_t * avr)
 				case 0xf900: {	// BLD – Bit Store from T into a Bit in Register 1111 100r rrrr 0bbb
 					uint8_t r = (opcode >> 4) & 0x1f; // register index
 					uint8_t s = opcode & 7;
-					uint8_t v = avr->data[r] | (avr->sreg[S_T] ? (1 << s) : 0);
+					uint8_t v = (avr->data[r] & ~(1 << s)) | (avr->sreg[S_T] ? (1 << s) : 0);
 					STATE("bld %s[%02x], 0x%02x = %02x\n", avr_regname(r), avr->data[r], 1 << s, v);
 					_avr_set_r(avr, r, v);
 				}	break;
